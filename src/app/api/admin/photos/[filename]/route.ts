@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import path from "path";
-import { readFile } from "fs/promises";
 import { getCurrentAdmin } from "@/lib/auth";
-import { getUploadPath } from "@/lib/upload";
+import { getSupabaseClient, PHOTOS_BUCKET } from "@/lib/supabase";
 
 const CONTENT_TYPES: Record<string, string> = {
   ".jpg": "image/jpeg",
@@ -29,15 +28,20 @@ export async function GET(
     return NextResponse.json({ error: "Geçersiz dosya." }, { status: 400 });
   }
 
-  try {
-    const buffer = await readFile(getUploadPath(safeFilename));
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "private, no-store",
-      },
-    });
-  } catch {
+  const { data, error } = await getSupabaseClient()
+    .storage.from(PHOTOS_BUCKET)
+    .download(safeFilename);
+
+  if (error || !data) {
     return NextResponse.json({ error: "Fotoğraf bulunamadı." }, { status: 404 });
   }
+
+  const buffer = Buffer.from(await data.arrayBuffer());
+
+  return new NextResponse(buffer, {
+    headers: {
+      "Content-Type": contentType,
+      "Cache-Control": "private, no-store",
+    },
+  });
 }

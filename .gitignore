@@ -39,12 +39,9 @@ yarn-error.log*
 # vercel
 .vercel
 
-# database
+# database (yerel geliştirmede artık kullanılmıyor, Supabase Postgres kullanılıyor)
 /prisma/*.db
 /prisma/*.db-journal
-
-# yüklenen fotoğraflar
-/uploads
 
 # typescript
 *.tsbuildinfo

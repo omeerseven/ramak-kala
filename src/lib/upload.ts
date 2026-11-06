@@ -1,8 +1,6 @@
 import { randomBytes } from "crypto";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
+import { getSupabaseClient, PHOTOS_BUCKET } from "@/lib/supabase";
 
-const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -24,15 +22,17 @@ export async function savePhoto(file: File): Promise<UploadResult> {
     return { ok: false, error: "Sadece JPG, PNG veya WEBP formatında fotoğraf yükleyebilirsiniz." };
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
-
   const filename = `${Date.now()}-${randomBytes(8).toString("hex")}.${extension}`;
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(UPLOAD_DIR, filename), buffer);
+
+  const { error } = await getSupabaseClient()
+    .storage.from(PHOTOS_BUCKET)
+    .upload(filename, buffer, { contentType: file.type });
+
+  if (error) {
+    console.error("Supabase Storage yükleme hatası:", error);
+    return { ok: false, error: "Fotoğraf yüklenirken bir hata oluştu." };
+  }
 
   return { ok: true, filename };
-}
-
-export function getUploadPath(filename: string): string {
-  return path.join(UPLOAD_DIR, filename);
 }

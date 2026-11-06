@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum ReportType {
+  RAMAK_KALA
+  TEHLIKELI_DURUM
+  SIKAYET
+  ONERI
+  TALEP
+}
+
+enum ReportStatus {
+  BEKLIYOR
+  INCELENIYOR
+  COZULDU
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  workplace   String
+  subject     String
+  type        ReportType
+  description String
+  photoPath   String?
+  status      ReportStatus @default(BEKLIYOR)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Admin {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

@@ -1,8 +1,22 @@
 import QRCode from "qrcode";
 import { Download, QrCode } from "lucide-react";
 
+function resolveSiteUrl(): string {
+  // Vercel'in otomatik sağladığı kalıcı prod alan adı (ör. ramak-kala.vercel.app).
+  // Mevcutsa her zaman bunu kullan; böylece NEXT_PUBLIC_SITE_URL yanlış/eski
+  // girilse veya hiç girilmese bile QR kod prod'da doğru adrese gider.
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  // Yerel geliştirme / telefonla LAN testi için elle ayarlanan adres.
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+  return "http://localhost:3000";
+}
+
 export async function QrCodeCard() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = resolveSiteUrl();
   const targetUrl = `${siteUrl.replace(/\/$/, "")}/bildir`;
 
   const qrDataUrl = await QRCode.toDataURL(targetUrl, {

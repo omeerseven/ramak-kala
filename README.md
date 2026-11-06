@@ -63,7 +63,7 @@ cp .env.example .env
 | `DIRECT_URL` | Database → Connection string → **Direct connection** (port 5432) | Sadece şema senkronizasyonunda (`prisma db push`) kullanılır |
 | `SUPABASE_URL` | Project Settings → API → Project URL | Storage istemcisi için proje adresi |
 | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → `service_role` anahtarı | **Gizli.** Sadece sunucu tarafında kullanılır |
-| `NEXT_PUBLIC_SITE_URL` | — | Ana sayfadaki QR kodun yönlendirdiği adres (aşağıya bakın) |
+| `NEXT_PUBLIC_SITE_URL` | — | Sadece yerel geliştirme/telefon LAN testi için. **Vercel'de gerekmez** (aşağıya bakın) |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | — | İlk kurulumda (`db:seed`) oluşturulacak demo yönetici hesabı |
 
 `.env` dosyası `.gitignore` ile Git'ten hariç tutulur — gerçek şifre/anahtarlarınız asla GitHub'a gönderilmez. Sadece placeholder değerler içeren `.env.example` deponda görünür.
@@ -99,9 +99,10 @@ Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini açın.
    | `DIRECT_URL` | Supabase Direct connection bağlantı dizesi (port 5432) |
    | `SUPABASE_URL` | Supabase Project URL |
    | `SUPABASE_SERVICE_ROLE_KEY` | Supabase `service_role` anahtarı |
-   | `NEXT_PUBLIC_SITE_URL` | Vercel'in vereceği/vermiş olduğu alan adı, örn. `https://ramak-kala.vercel.app` |
    | `ADMIN_USERNAME` | Yönetici kullanıcı adınız |
    | `ADMIN_PASSWORD` | Yönetici şifreniz |
+
+   `NEXT_PUBLIC_SITE_URL` eklemenize **gerek yoktur** — ana sayfa QR kodu, Vercel'in otomatik sağladığı prod alan adını (`VERCEL_PROJECT_PRODUCTION_URL`) kullanır ve her zaman doğru adrese yönlenir. Sadece özel bir alan adı bağlarsanız veya yerelde telefonla LAN testi yaparken bu değişkeni kullanmanız gerekir (aşağıya bakın).
 
    Hepsini **Production**, **Preview** ve **Development** ortamlarının tümü için eklemeniz önerilir.
 3. **Deploy** edin. Build sırasında `postinstall` script'i otomatik olarak `prisma generate` çalıştırır.
@@ -110,8 +111,7 @@ Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini açın.
    npm run db:push
    npm run db:seed
    ```
-5. Deploy tamamlandığında Vercel adresinizi `NEXT_PUBLIC_SITE_URL` değişkenine girip (adım 2) yeniden deploy edin ki ana sayfadaki QR kod doğru adrese yönlensin.
-6. `https://<projeniz>.vercel.app/admin/login` üzerinden `ADMIN_USERNAME` / `ADMIN_PASSWORD` ile giriş yapabilirsiniz. Oturumlar artık gerçek bir Postgres veritabanında tutulduğu için Vercel'in serverless fonksiyonları arasında sorunsuz çalışır.
+5. `https://<projeniz>.vercel.app/admin/login` üzerinden `ADMIN_USERNAME` / `ADMIN_PASSWORD` ile giriş yapabilirsiniz. Oturumlar artık gerçek bir Postgres veritabanında tutulduğu için Vercel'in serverless fonksiyonları arasında sorunsuz çalışır.
 
 ## Telefonla Test Etme (QR Kod)
 
@@ -120,7 +120,7 @@ Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini açın.
 2. `.env` dosyasında `NEXT_PUBLIC_SITE_URL` değerini bu IP ile güncelleyin: `http://192.168.1.101:3000`
 3. `npm run dev`'i yeniden başlatın, ana sayfayı yenileyin. Telefon ve bilgisayar aynı Wi-Fi ağında olmalı.
 
-**Vercel'de test:** `NEXT_PUBLIC_SITE_URL`'i Vercel alan adınız olarak ayarlamanız yeterli (yukarıdaki Deploy bölümüne bakın) — telefon artık herhangi bir ağdan QR kodu okutabilir.
+**Vercel'de test:** Ek bir ayara gerek yok — QR kod otomatik olarak Vercel'in prod alan adına (`https://<projeniz>.vercel.app/bildir`) yönlenir, telefon herhangi bir ağdan okutabilir.
 
 Ana sayfada QR kodun altındaki **"QR Kodu İndir"** butonuyla kodu PNG olarak indirip yazdırabilir veya paylaşabilirsiniz.
 
